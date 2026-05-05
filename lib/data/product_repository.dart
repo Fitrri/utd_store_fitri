@@ -5,20 +5,10 @@ class ProductRepository {
   final Dio _dio;
 
   ProductRepository(this._dio) {
-    // TAMBAHKAN INI: Interceptor Logger sesuai permintaan PDF
     _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) {
-        print('--- REQUEST KE: ${options.path} ---');
-        return handler.next(options);
-      },
-      onResponse: (response, handler) {
-        print('--- RESPONSE BERHASIL ---');
-        return handler.next(response);
-      },
-      onError: (DioException e, handler) {
-        print('--- ERROR JARINGAN: ${e.message} ---');
-        return handler.next(e);
-      },
+      onRequest: (options, handler) => handler.next(options),
+      onResponse: (response, handler) => handler.next(response),
+      onError: (DioException e, handler) => handler.next(e),
     ));
   }
 
@@ -27,8 +17,21 @@ class ProductRepository {
       final response = await _dio.get('https://fakestoreapi.com/products');
       if (response.statusCode == 200) {
         List data = response.data;
-        // Logika [Promo Ongkir] otomatis jalan karena NIM Genap (0)
-        return data.map((json) => Product.fromJson(json)).toList();
+        return data.map((json) {
+          final productOriginal = Product.fromJson(json);
+          
+          // JURUS AMPUH: Hapus semua tulisan promo yang sudah ada, lalu pasang 1 saja
+          String cleanTitle = productOriginal.title.replaceAll("[Promo Ongkir]", "").trim();
+
+          return Product(
+            id: productOriginal.id,
+            title: "$cleanTitle [Promo Ongkir]", 
+            price: productOriginal.price,
+            description: productOriginal.description,
+            category: productOriginal.category,
+            image: productOriginal.image,
+          );
+        }).toList();
       }
       throw Exception('Gagal ambil data');
     } catch (e) {

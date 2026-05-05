@@ -10,73 +10,99 @@ class DetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const Color themeBlue = Colors.blueAccent;
+
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Detail Produk"),
-        backgroundColor: Colors.blueAccent,
+        elevation: 0,
+        backgroundColor: themeBlue,
+        title: const Text(
+          "Detail Produk",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Gambar Produk dengan Hero Animation agar smooth
+            // Gambar Produk dengan Hero Animation
             Hero(
               tag: product.id,
               child: Container(
                 width: double.infinity,
-                height: 300,
+                height: 350,
                 color: Colors.white,
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(30),
                 child: Image.network(product.image, fit: BoxFit.contain),
               ),
             ),
             
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    product.category.toUpperCase(),
-                    style: const TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold),
+                  // Label Kategori
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: themeBlue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      product.category.toUpperCase(),
+                      style: const TextStyle(
+                        color: themeBlue,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 16),
+                  
+                  // Judul Produk
                   Text(
                     product.title,
-                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      height: 1.3,
+                    ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
+                  
+                  // Harga
                   Text(
                     "\$${product.price}",
-                    style: const TextStyle(fontSize: 20, color: Colors.green, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 24,
+                      color: Colors.green,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
-                  const Divider(height: 30),
+                  
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20),
+                    child: Divider(thickness: 1),
+                  ),
+                  
+                  // Deskripsi
                   const Text(
                     "Deskripsi",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
                   Text(
                     product.description,
-                    style: const TextStyle(fontSize: 16, height: 1.5),
-                  ),
-                  const SizedBox(height: 30),
-
-                  // TOMBOL ISOLATE (Poin 4 PDF)
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        // Nanti kita isi logika Isolate di Commit #9
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Menghitung Pajak via Isolate..."))
-                        );
-                      },
-                      icon: const Icon(Icons.calculate),
-                      label: const Text("Kalkulasi Pajak (Heavy Task)"),
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.blueGrey),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey.shade700,
+                      height: 1.6,
                     ),
                   ),
+                  const SizedBox(height: 100), // Spasi agar tidak tertutup FAB
                 ],
               ),
             ),
@@ -84,28 +110,34 @@ class DetailPage extends StatelessWidget {
         ),
       ),
       
-      // TOMBOL BOOKMARK/FAVORITE (Poin 3 PDF)
+      // Tombol Tambah ke Favorit (Tetap Ada)
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           final isar = sl<Isar>();
           
-          // Syarat Anti-AI: Tambahkan Timestamp (Jam:Menit)
+          // Set timestamp saat disimpan (Syarat Anti-AI)
           product.savedAt = DateFormat('HH:mm').format(DateTime.now());
 
           await isar.writeTxn(() async {
             await isar.products.put(product);
           });
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("Disimpan ke Bookmark pada ${product.savedAt}"),
-              backgroundColor: Colors.green,
-            ),
-          );
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("Berhasil disimpan ke Favorit pada ${product.savedAt}"),
+                backgroundColor: Colors.green,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
         },
-        label: const Text("Tambah Favorit"),
-        icon: const Icon(Icons.favorite, color: Colors.white),
         backgroundColor: Colors.redAccent,
+        icon: const Icon(Icons.favorite, color: Colors.white),
+        label: const Text(
+          "Tambah Favorit",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }

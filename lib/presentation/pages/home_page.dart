@@ -9,122 +9,82 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const Color themeBlue = Colors.blueAccent;
+
     return BlocProvider(
       create: (context) => sl<ProductCubit>()..getProducts(),
       child: Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
-          title: const Text("UTD Store - Fitri"),
-          backgroundColor: Colors.blueAccent,
+          backgroundColor: themeBlue,
+          elevation: 2,
+          title: const Text(
+            "UTD Store - Fitri",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.currency_exchange),
+              icon: const Icon(Icons.bolt_rounded, color: Colors.orange, size: 28),
               onPressed: () => context.push('/crypto'),
             ),
             IconButton(
-              icon: const Icon(Icons.bookmarks),
+              icon: const Icon(Icons.bookmark_rounded, color: Colors.yellowAccent, size: 28),
               onPressed: () => context.push('/bookmarks'),
             ),
           ],
         ),
-        body: Column(
-          children: [
-            Expanded(
-              child: BlocBuilder<ProductCubit, ProductState>(
-                builder: (context, state) {
-                  if (state is ProductLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  
-                  if (state is ProductSuccess) {
-                    return ListView.builder(
-                      itemCount: state.products.length,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                      itemBuilder: (context, index) {
-                        final product = state.products[index];
-
-                        // LOGIKA PECAH TEKS
-                        bool hasPromo = product.title.contains("[Promo Ongkir]");
-                        String cleanTitle = product.title.replaceAll("[Promo Ongkir]", "").trim();
-
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                          child: InkWell(
-                            onTap: () => context.push('/detail', extra: product),
-                            borderRadius: BorderRadius.circular(15),
-                            child: Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 80,
-                                    height: 80,
-                                    padding: const EdgeInsets.all(5),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade100,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Image.network(product.image, fit: BoxFit.contain),
-                                  ),
-                                  const SizedBox(width: 15),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          cleanTitle,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(fontWeight: FontWeight.bold),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              "\$${product.price}",
-                                              style: const TextStyle(
-                                                color: Colors.green, 
-                                                fontWeight: FontWeight.w900, 
-                                                fontSize: 16
-                                              ),
-                                            ),
-                                            if (hasPromo)
-                                              Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.blue.shade700,
-                                                  borderRadius: BorderRadius.circular(8),
-                                                ),
-                                                child: const Row(
-                                                  children: [
-                                                    Icon(Icons.local_shipping, size: 12, color: Colors.white),
-                                                    SizedBox(width: 4),
-                                                    Text(
-                                                      "Promo Ongkir", 
-                                                      style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
+        body: BlocBuilder<ProductCubit, ProductState>(
+          builder: (context, state) {
+            if (state is ProductLoading) {
+              return const Center(child: CircularProgressIndicator(color: themeBlue));
+            }
+            if (state is ProductSuccess) {
+              return ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: state.products.length,
+                itemBuilder: (context, index) {
+                  final product = state.products[index];
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Image.network(product.image, width: 80, height: 80, fit: BoxFit.contain),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                product.title,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                               ),
-                            ),
+                              const SizedBox(height: 8),
+                              Text(
+                                "\$${product.price}",
+                                style: const TextStyle(color: themeBlue, fontWeight: FontWeight.bold, fontSize: 16),
+                              ),
+                            ],
                           ),
-                        );
-                      },
-                    );
-                  }
-                  return const Center(child: Text("Gagal memuat data"));
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.arrow_forward_ios, size: 14),
+                          onPressed: () => context.push('/detail', extra: product),
+                        )
+                      ],
+                    ),
+                  );
                 },
-              ),
-            ),
-          ],
+              );
+            }
+            return const Center(child: Text("Gagal memuat data"));
+          },
         ),
       ),
     );

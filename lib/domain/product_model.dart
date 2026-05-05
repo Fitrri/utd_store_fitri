@@ -1,10 +1,18 @@
+import 'package:isar/isar.dart';
+
+part 'product_model.g.dart';
+
+@collection
 class Product {
+  Id isarId = Isar.autoIncrement;
+
   final int id;
   final String title;
   final double price;
   final String description;
   final String category;
   final String image;
+  String? savedAt;
 
   Product({
     required this.id,
@@ -13,13 +21,14 @@ class Product {
     required this.description,
     required this.category,
     required this.image,
+    this.savedAt,
   });
 
-  // Logika Khusus NIM Genap: Modifikasi data saat konversi dari JSON
+  // TAMBAHKAN KEMBALI METHOD INI (Penyebab error tadi)
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
       id: json['id'],
-      // Menambahkan teks [Promo Ongkir] sesuai instruksi Pak Mamok
+      // Logika NIM Genap: Tambahkan [Promo Ongkir]
       title: "${json['title']} [Promo Ongkir]", 
       price: (json['price'] as num).toDouble(),
       description: json['description'],
